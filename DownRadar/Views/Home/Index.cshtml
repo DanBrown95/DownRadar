@@ -1,0 +1,93 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="jumbotron" style="text-align: center;">
+    <h2>Down Radar</h2>
+    <p>Check the status of a domain or set up mobile alerts to be notified when that domain goes down</p>
+</div>
+<div class="row">
+    <div class="col-md-7">
+        <div>
+            <form onsubmit="return pingUrl()">
+                <h6 for="url">Enter the url you wish to check</h6>
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">http://</span>
+                    </div>
+                    <input type="text" class="input-group-text" id="url" min="7" required>
+                    <span class="input-group-btn pull-left">
+                        <button class="btn btn-success" type="submit">Go!</button>
+                    </span>
+                </div>
+            </form>
+        </div>
+        <hr />
+        <br />
+        <div>
+            <form onsubmit="return subscribe();">
+                <h6 for="subscribe-url">Subscribe to a url and receive alerts to your cell?</h6>
+                <div class="input-group mb-1">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">http://</span>
+                    </div>
+                    <input type="text" class="input-group-text" id="subscribe-url" min="7" required>
+                </div><br />
+                <div class="input-group mb-1">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">(  + 1  )</span>
+                    </div>
+                    <input type="text" class="input-group-text" id="mobile" minLenth="10" maxlength="10" pattern="[1-9]{1}[0-9]{9}" required>
+                </div><br />
+
+                <p for="hours">Be notified for how many hours?</p>
+                <div class="input-group col-sm-2 mb-2" style="padding-left: 0;">
+                    <input class="form-control" id="hours" type="number" min="1" max="48" value="1" required />
+                </div>
+                <div class="input-group" style="margin-top: 1em;">
+                    <button class="btn btn-success" type="submit">Subscribe</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="form-group col-md-5 pull-left">
+        <h4 for="result-window">Status Results</h4>
+        <textarea id="result-window" rows="20" class="form-control" style="background-color: black; min-width: 100%; resize: none;" readonly></textarea>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function pingUrl() {
+        var url = document.getElementById("url").value;
+        $.ajax({
+            type: "GET",
+            url: "/Detector/PingUrl",
+            data: { url: url },
+            success: function (data) {
+                $('#result-window').html($('#result-window').val() + '&#10;' + data.url + '&#10;' + data.result);
+            }
+        })
+        return false;
+    }
+
+    function subscribe() {
+        var url = document.getElementById("subscribe-url").value;
+        var phone = document.getElementById("mobile").value;
+        var hours = document.getElementById("hours").value;
+
+        $.ajax({
+            type: "POST",
+            url: "/SMS/Subscribe",
+            data: {
+                url: url,
+                phone: phone,
+                hours: hours
+            },
+            success: function (data) {
+                $('#result-window').html($('#result-window').val() + '&#10;' + "Successfully subscribed to " + data.url);
+                console.log("data", data);
+            }
+        })
+        return false;
+    }
+</script>
